@@ -36,9 +36,9 @@ app.post("/send-email", async (req, res) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        user_id: EMAILJS_PUBLIC_KEY,
         service_id: EMAILJS_SERVICE,
         template_id: EMAILJS_TEMPLATE,
-        user_id: EMAILJS_PUBLIC_KEY,
         template_params
       })
     });
