@@ -3,6 +3,7 @@ import cors from "cors";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
@@ -10,16 +11,20 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const __dirname = path.resolve();
-
-// 👉 STATIC FILES DITO
-app.use(express.static("public"));
+// Static hosting
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// EMAILJS API ENDPOINT
+// EMAILJS ENV VALUES
+const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY;
+const EMAILJS_SERVICE = process.env.EMAILJS_SERVICE;
+const EMAILJS_TEMPLATE = process.env.EMAILJS_TEMPLATE;
+
 app.post("/send-email", async (req, res) => {
   const { template_params } = req.body;
 
@@ -28,24 +33,27 @@ app.post("/send-email", async (req, res) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        service_id: process.env.EMAILJS_SERVICE,
-        template_id: process.env.EMAILJS_TEMPLATE,
-        user_id: process.env.EMAILJS_PUBLIC_KEY,
-        template_params,
-      }),
+        service_id: EMAILJS_SERVICE,
+        template_id: EMAILJS_TEMPLATE,
+        user_id: EMAILJS_PUBLIC_KEY,
+        template_params
+      })
     });
 
-    const data = await response.text();
-    console.log("EmailJS Response:", data);
+    if (!response.ok) {
+      const errorData = await response.text();
+      return res.status(500).json({ error: "EmailJS failed", details: errorData });
+    }
 
     res.json({ success: true });
+
   } catch (error) {
-    console.log("Error:", error);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server crashed", details: error });
   }
 });
 
-// PORT
+// Render port
 app.listen(process.env.PORT || 10000, () => {
   console.log("🚀 Server running...");
 });
+
