@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
-import fetch from "node-fetch";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import fetch from "node-fetch";
 
 dotenv.config();
 
@@ -20,11 +20,12 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// ENV
+// ENV variables
 const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY;
 const EMAILJS_SERVICE = process.env.EMAILJS_SERVICE;
 const EMAILJS_TEMPLATE = process.env.EMAILJS_TEMPLATE;
 
+// Send Email Route
 app.post("/send-email", async (req, res) => {
   const { template_params } = req.body;
 
@@ -53,6 +54,7 @@ app.post("/send-email", async (req, res) => {
     res.json({ success: true });
 
   } catch (error) {
+    console.error("❌ Server Error:", error);
     res.status(500).json({ error: "Server crashed", details: error });
   }
 });
