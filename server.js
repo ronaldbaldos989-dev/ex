@@ -9,6 +9,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// DEFAULT ROUTE PARA DI LUMABAS ANG "Cannot GET /"
+app.get("/", (req, res) => {
+  res.send("✅ Server is running!");
+});
+
 // EMAILJS ENV VALUES (galing sa Render Dashboard)
 const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY;
 const EMAILJS_SERVICE = process.env.EMAILJS_SERVICE;
