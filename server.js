@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
+import path from "path";
 
 dotenv.config();
 
@@ -9,16 +10,16 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// DEFAULT ROUTE PARA DI LUMABAS ANG "Cannot GET /"
+const __dirname = path.resolve();
+
+// 👉 STATIC FILES DITO
+app.use(express.static("public"));
+
 app.get("/", (req, res) => {
-  res.send("✅ Server is running!");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// EMAILJS ENV VALUES (galing sa Render Dashboard)
-const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY;
-const EMAILJS_SERVICE = process.env.EMAILJS_SERVICE;
-const EMAILJS_TEMPLATE = process.env.EMAILJS_TEMPLATE;
-
+// EMAILJS API ENDPOINT
 app.post("/send-email", async (req, res) => {
   const { template_params } = req.body;
 
@@ -27,29 +28,24 @@ app.post("/send-email", async (req, res) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        service_id: EMAILJS_SERVICE,
-        template_id: EMAILJS_TEMPLATE,
-        user_id: EMAILJS_PUBLIC_KEY,
-        template_params
-      })
+        service_id: process.env.EMAILJS_SERVICE,
+        template_id: process.env.EMAILJS_TEMPLATE,
+        user_id: process.env.EMAILJS_PUBLIC_KEY,
+        template_params,
+      }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.log("❌ EmailJS Error:", errorData);
-      return res.status(500).json({ error: "EmailJS failed", details: errorData });
-    }
+    const data = await response.text();
+    console.log("EmailJS Response:", data);
 
-    console.log("✅ Email sent!");
     res.json({ success: true });
-
   } catch (error) {
-    console.log("❌ Server Error:", error);
-    res.status(500).json({ error: "Server crashed", details: error });
+    console.log("Error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// RENDER PORT
+// PORT
 app.listen(process.env.PORT || 10000, () => {
   console.log("🚀 Server running...");
 });
